@@ -9,7 +9,6 @@ import {
   MapPin,
   Moon,
   Navigation,
-  Satellite,
   Search,
   SlidersHorizontal,
   Sun,
@@ -195,18 +194,30 @@ export const TopBar: React.FC = () => {
 
   return (
     <>
-      <header className="no-print relative z-30 flex h-[56px] shrink-0 items-center justify-between gap-3 border-b border-[var(--line)] bg-[var(--surface)] px-3 lg:px-4">
-        {/* Left: Brand Wordmark + Space Apps micro-badge */}
+      <header className="no-print relative z-30 flex h-[58px] shrink-0 items-center justify-between gap-3 border-b border-[var(--line)] bg-[var(--surface)]/95 px-3.5 lg:px-5">
+        {/* Left: Google Earth-inspired Orbital Globe Mark + Wordmark */}
         <div className="flex shrink-0 items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-[4px] bg-[var(--primary)] text-white">
-            <Satellite className="h-4 w-4" aria-hidden="true" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--interactive)]/35 bg-[var(--bg)] text-[var(--interactive)]">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="5" fill="currentColor" fillOpacity="0.2" stroke="currentColor" strokeWidth="1.6" />
+              <ellipse
+                cx="12"
+                cy="12"
+                rx="10"
+                ry="4"
+                transform="rotate(-24 12 12)"
+                stroke="currentColor"
+                strokeWidth="1.4"
+              />
+              <circle cx="19.2" cy="8.4" r="1.5" fill="var(--text)" />
+            </svg>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="whitespace-nowrap text-[16px] font-bold tracking-tight text-[var(--text)]">
+            <span className="font-display whitespace-nowrap text-[18px] font-bold tracking-tight text-[var(--text)]">
               {t.appName}
             </span>
-            <span className="hidden whitespace-nowrap rounded-[4px] border border-[var(--line)] bg-[var(--raised)] px-1.5 py-0.5 font-mono-tabular text-[11px] font-medium text-[var(--muted)] sm:inline-block">
-              {t.spaceAppsBadge}
+            <span className="hidden whitespace-nowrap text-[12px] text-[var(--muted)] sm:inline-block">
+              · {t.spaceAppsBadge}
             </span>
           </div>
         </div>
@@ -216,7 +227,7 @@ export const TopBar: React.FC = () => {
           <div ref={searchWrapRef} className="relative min-w-0 flex-1">
             <div className="relative flex items-center">
               <Search
-                className="pointer-events-none absolute start-2.5 h-3.5 w-3.5 text-[var(--muted)]"
+                className="pointer-events-none absolute start-3.5 h-3.5 w-3.5 text-[var(--muted)]"
                 aria-hidden="true"
               />
               <input
@@ -231,7 +242,7 @@ export const TopBar: React.FC = () => {
                 onKeyDown={handleSearchKeyDown}
                 placeholder={t.searchPlaceholder}
                 aria-label={t.searchPlaceholder}
-                className="h-9 w-full rounded-[4px] border border-[var(--line)] bg-[var(--bg)] pe-8 ps-8 text-[13px] text-[var(--text)] placeholder:text-[var(--muted)] transition-colors duration-150 focus:border-[var(--interactive)] focus:outline-none"
+                className="h-9 w-full rounded-full border border-[var(--line)] bg-[var(--bg)] pe-9 ps-9 text-[13px] text-[var(--text)] placeholder:text-[var(--muted)] transition-colors duration-150 focus:border-[var(--interactive)] focus:outline-none"
               />
               {query && (
                 <button
@@ -241,7 +252,7 @@ export const TopBar: React.FC = () => {
                     setResults([]);
                   }}
                   aria-label="Clear search"
-                  className="absolute end-2 text-[var(--muted)] hover:text-[var(--text)]"
+                  className="absolute end-3 text-[var(--muted)] hover:text-[var(--text)]"
                 >
                   <X className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
@@ -249,7 +260,7 @@ export const TopBar: React.FC = () => {
             </div>
 
             {searchOpen && query.trim().length >= 2 && (
-              <div className="absolute start-0 end-0 top-[calc(100%+4px)] z-50 overflow-hidden rounded-[6px] border border-[var(--line)] bg-[var(--surface)] shadow-xl">
+              <div className="absolute start-0 end-0 top-[calc(100%+6px)] z-50 overflow-hidden rounded-[14px] border border-[var(--line)] bg-[var(--surface)] shadow-2xl">
                 {searching ? (
                   <div className="flex items-center gap-2 px-3 py-2.5 text-[13px] text-[var(--muted)]">
                     <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
@@ -299,7 +310,7 @@ export const TopBar: React.FC = () => {
             disabled={gpsLoading}
             title={t.useMyGps}
             aria-label={t.useMyGps}
-            className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[4px] border border-[var(--line)] bg-[var(--bg)] px-2.5 text-[12px] font-medium text-[var(--text)] transition-colors duration-150 hover:border-[var(--interactive)] hover:bg-[var(--raised)] disabled:opacity-60"
+            className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--bg)] px-3 text-[12px] font-medium text-[var(--text)] transition-colors duration-150 hover:border-[var(--interactive)] hover:bg-[var(--raised)] disabled:opacity-60"
           >
             {gpsLoading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin text-[var(--interactive)]" aria-hidden="true" />
@@ -316,7 +327,7 @@ export const TopBar: React.FC = () => {
               onClick={() => setSavedOpen((o) => !o)}
               title={t.savedLocations}
               aria-label={t.savedLocations}
-              className="inline-flex h-9 items-center gap-1.5 rounded-[4px] border border-[var(--line)] bg-[var(--bg)] px-2.5 text-[12px] font-medium text-[var(--text)] transition-colors duration-150 hover:border-[var(--interactive)] hover:bg-[var(--raised)]"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--bg)] px-3 text-[12px] font-medium text-[var(--text)] transition-colors duration-150 hover:border-[var(--interactive)] hover:bg-[var(--raised)]"
             >
               <Bookmark
                 className={`h-3.5 w-3.5 ${
@@ -331,7 +342,7 @@ export const TopBar: React.FC = () => {
             </button>
 
             {savedOpen && (
-              <div className="absolute end-0 top-[calc(100%+6px)] z-50 w-72 rounded-[6px] border border-[var(--line)] bg-[var(--surface)] p-2 shadow-xl">
+              <div className="absolute end-0 top-[calc(100%+8px)] z-50 w-72 rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-2.5 shadow-2xl">
                 <div className="mb-2 flex items-center justify-between border-b border-[var(--line)] pb-2">
                   <span className="truncate text-[12px] font-semibold text-[var(--text)]">
                     {location.name}
@@ -396,14 +407,14 @@ export const TopBar: React.FC = () => {
           <div
             role="group"
             aria-label={t.radiusLabel}
-            className="flex items-center rounded-[4px] border border-[var(--line)] bg-[var(--bg)] p-0.5"
+            className="flex items-center rounded-full border border-[var(--line)] bg-[var(--bg)] p-0.5"
           >
             {RADII.map((r) => (
               <button
                 key={r}
                 type="button"
                 onClick={() => setRadiusKm(r)}
-                className={`whitespace-nowrap rounded-[3px] px-2 py-1 font-mono-tabular text-[12px] font-medium transition-colors duration-150 ${
+                className={`whitespace-nowrap rounded-full px-2.5 py-1 font-mono-tabular text-[12px] font-medium transition-colors duration-150 ${
                   radiusKm === r
                     ? 'bg-[var(--primary)] text-white'
                     : 'text-[var(--muted)] hover:text-[var(--text)]'
@@ -417,14 +428,14 @@ export const TopBar: React.FC = () => {
           {/* Persona selector */}
           <div className="relative flex items-center">
             <Compass
-              className="pointer-events-none absolute start-2.5 h-3.5 w-3.5 text-[var(--interactive)]"
+              className="pointer-events-none absolute start-3 h-3.5 w-3.5 text-[var(--interactive)]"
               aria-hidden="true"
             />
             <select
               aria-label={t.personaLabel}
               value={persona}
               onChange={(e) => setPersona(e.target.value as Persona)}
-              className="h-8 appearance-none rounded-[4px] border border-[var(--line)] bg-[var(--bg)] pe-7 ps-8 text-[12px] font-medium text-[var(--text)] transition-colors duration-150 hover:border-[var(--interactive)]"
+              className="h-8 appearance-none rounded-full border border-[var(--line)] bg-[var(--bg)] pe-7 ps-8 text-[12px] font-medium text-[var(--text)] transition-colors duration-150 hover:border-[var(--interactive)]"
             >
               {PERSONAS.map((p) => (
                 <option key={p} value={p}>
@@ -433,7 +444,7 @@ export const TopBar: React.FC = () => {
               ))}
             </select>
             <ChevronDown
-              className="pointer-events-none absolute end-2 h-3.5 w-3.5 text-[var(--muted)]"
+              className="pointer-events-none absolute end-2.5 h-3.5 w-3.5 text-[var(--muted)]"
               aria-hidden="true"
             />
           </div>
@@ -442,12 +453,12 @@ export const TopBar: React.FC = () => {
           <div
             role="group"
             aria-label="Language"
-            className="flex items-center rounded-[4px] border border-[var(--line)] bg-[var(--bg)] p-0.5"
+            className="flex items-center rounded-full border border-[var(--line)] bg-[var(--bg)] p-0.5"
           >
             <button
               type="button"
               onClick={() => setLanguage('en')}
-              className={`rounded-[3px] px-2 py-1 text-[12px] font-medium transition-colors duration-150 ${
+              className={`rounded-full px-2.5 py-1 text-[12px] font-medium transition-colors duration-150 ${
                 language === 'en'
                   ? 'bg-[var(--raised)] text-[var(--text)]'
                   : 'text-[var(--muted)] hover:text-[var(--text)]'
@@ -458,7 +469,7 @@ export const TopBar: React.FC = () => {
             <button
               type="button"
               onClick={() => setLanguage('ur')}
-              className={`rounded-[3px] px-2 py-1 text-[12px] font-medium transition-colors duration-150 ${
+              className={`rounded-full px-2.5 py-1 text-[12px] font-medium transition-colors duration-150 ${
                 language === 'ur'
                   ? 'bg-[var(--raised)] text-[var(--text)]'
                   : 'text-[var(--muted)] hover:text-[var(--text)]'
@@ -473,7 +484,7 @@ export const TopBar: React.FC = () => {
             type="button"
             onClick={toggleTheme}
             aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-[4px] border border-[var(--line)] bg-[var(--bg)] text-[var(--text)] transition-colors duration-150 hover:border-[var(--interactive)] hover:bg-[var(--raised)]"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--bg)] text-[var(--text)] transition-colors duration-150 hover:border-[var(--interactive)] hover:bg-[var(--raised)]"
           >
             {theme === 'dark' ? (
               <Sun className="h-4 w-4 text-[var(--status-watch)]" aria-hidden="true" />
@@ -487,7 +498,7 @@ export const TopBar: React.FC = () => {
             <button
               type="button"
               onClick={() => setDemoOpen((o) => !o)}
-              className={`inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-[4px] border px-2.5 text-[12px] font-medium transition-colors duration-150 ${
+              className={`inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 text-[12px] font-medium transition-colors duration-150 ${
                 activeScenarioId !== 'live'
                   ? 'border-[var(--status-warning)] bg-[var(--status-warning)]/15 text-[var(--status-warning)]'
                   : 'border-[var(--line)] bg-[var(--bg)] text-[var(--text)] hover:border-[var(--interactive)]'
@@ -498,14 +509,14 @@ export const TopBar: React.FC = () => {
             </button>
 
             {demoOpen && (
-              <div className="absolute end-0 top-[calc(100%+6px)] z-50 w-80 rounded-[6px] border border-[var(--line)] bg-[var(--surface)] p-1.5 shadow-xl">
+              <div className="absolute end-0 top-[calc(100%+8px)] z-50 w-80 rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-2 shadow-2xl">
                 <button
                   type="button"
                   onClick={() => {
                     selectDemoScenario('live');
                     setDemoOpen(false);
                   }}
-                  className={`flex w-full items-center justify-between rounded-[4px] px-2.5 py-2 text-start text-[12px] font-medium transition-colors duration-150 ${
+                  className={`flex w-full items-center justify-between rounded-[8px] px-3 py-2 text-start text-[12px] font-medium transition-colors duration-150 ${
                     activeScenarioId === 'live'
                       ? 'bg-[var(--primary)] text-white'
                       : 'text-[var(--text)] hover:bg-[var(--raised)]'
@@ -514,7 +525,7 @@ export const TopBar: React.FC = () => {
                   <span>{t.liveTelemetry}</span>
                   <span className="font-mono-tabular text-[11px] opacity-80">LIVE API</span>
                 </button>
-                <div className="my-1 border-t border-[var(--line)]" />
+                <div className="my-1.5 border-t border-[var(--line)]" />
                 {DEMO_SCENARIOS.map((sc) => (
                   <button
                     key={sc.id}
@@ -523,7 +534,7 @@ export const TopBar: React.FC = () => {
                       selectDemoScenario(sc.id);
                       setDemoOpen(false);
                     }}
-                    className={`w-full rounded-[4px] px-2.5 py-2 text-start transition-colors duration-150 ${
+                    className={`w-full rounded-[8px] px-3 py-2 text-start transition-colors duration-150 ${
                       activeScenarioId === sc.id
                         ? 'bg-[var(--raised)] text-[var(--interactive)]'
                         : 'text-[var(--text)] hover:bg-[var(--raised)]'
@@ -545,7 +556,7 @@ export const TopBar: React.FC = () => {
           <button
             type="button"
             onClick={() => setMethodsOpen(true)}
-            className="inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-[4px] border border-[var(--line)] bg-[var(--bg)] px-2.5 text-[12px] font-medium text-[var(--text)] transition-colors duration-150 hover:border-[var(--interactive)] hover:bg-[var(--raised)]"
+            className="inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--line)] bg-[var(--bg)] px-3 text-[12px] font-medium text-[var(--text)] transition-colors duration-150 hover:border-[var(--interactive)] hover:bg-[var(--raised)]"
           >
             <Info className="h-3.5 w-3.5 shrink-0 text-[var(--interactive)]" aria-hidden="true" />
             <span>{t.methodsBtn}</span>
@@ -556,7 +567,7 @@ export const TopBar: React.FC = () => {
         <button
           type="button"
           onClick={() => setControlsOpen(true)}
-          className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-[4px] border border-[var(--line)] bg-[var(--bg)] px-3 text-[13px] font-medium text-[var(--text)] lg:hidden"
+          className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--bg)] px-3.5 text-[13px] font-medium text-[var(--text)] lg:hidden"
         >
           <SlidersHorizontal className="h-4 w-4 text-[var(--interactive)]" aria-hidden="true" />
           <span className="hidden sm:inline">{t.controlsBtn}</span>

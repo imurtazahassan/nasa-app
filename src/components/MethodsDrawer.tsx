@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ExternalLink, KeyRound, ShieldAlert, X } from 'lucide-react';
+import { ExternalLink, ShieldAlert, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 const PROVENANCE_ROWS = [
@@ -12,11 +12,11 @@ const PROVENANCE_ROWS = [
     nasa: true,
   },
   {
-    metric: 'Active Fire Detections',
-    instrument: 'NASA FIRMS VIIRS_SNPP_NRT + GIBS Thermal Anomalies',
-    resolution: '375 m',
-    cadence: 'Near Real-Time (< 3 hr)',
-    url: 'https://firms.modaps.eosdis.nasa.gov/',
+    metric: 'Active Fire & Thermal Anomalies',
+    instrument: 'NASA EONET v3 Wildfires + GIBS VIIRS 375m Thermal Layer',
+    resolution: '375 m / Event',
+    cadence: 'Near Real-Time',
+    url: 'https://eonet.gsfc.nasa.gov/docs/v3',
     nasa: true,
   },
   {
@@ -59,12 +59,19 @@ const PROVENANCE_ROWS = [
     url: 'https://open-meteo.com/en/docs/flood-api',
     nasa: false,
   },
+  {
+    metric: '3D Terrain Elevation',
+    instrument: 'Copernicus DEM 90m (via Open-Meteo Elevation API)',
+    resolution: '90 m',
+    cadence: 'Static DEM',
+    url: 'https://open-meteo.com/en/docs/elevation-api',
+    nasa: false,
+  },
 ];
 
 export const MethodsDrawer: React.FC = () => {
-  const { methodsOpen, setMethodsOpen, firmsApiKey, saveFirmsApiKey, t } = useApp();
+  const { methodsOpen, setMethodsOpen, t } = useApp();
   const [activeTab, setActiveTab] = useState<'data' | 'project'>('data');
-  const [keyInput, setKeyInput] = useState(firmsApiKey);
 
   if (!methodsOpen) return null;
 
@@ -88,19 +95,19 @@ export const MethodsDrawer: React.FC = () => {
             type="button"
             onClick={() => setMethodsOpen(false)}
             aria-label={t.closeBtn}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-[4px] border border-[var(--line)] bg-[var(--bg)] text-[var(--text)] hover:border-[var(--interactive)]"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--bg)] text-[var(--text)] hover:border-[var(--interactive)]"
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
 
         {/* Segmented Tabs */}
-        <div className="border-b border-[var(--line)] bg-[var(--bg)] px-5 py-2">
-          <div className="inline-flex rounded-[4px] border border-[var(--line)] bg-[var(--surface)] p-0.5">
+        <div className="border-b border-[var(--line)] bg-[var(--bg)] px-5 py-2.5">
+          <div className="inline-flex rounded-full border border-[var(--line)] bg-[var(--surface)] p-0.5">
             <button
               type="button"
               onClick={() => setActiveTab('data')}
-              className={`rounded-[3px] px-3 py-1.5 text-[13px] font-medium transition-colors duration-150 ${
+              className={`rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors duration-150 ${
                 activeTab === 'data'
                   ? 'bg-[var(--primary)] text-white'
                   : 'text-[var(--muted)] hover:text-[var(--text)]'
@@ -111,7 +118,7 @@ export const MethodsDrawer: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveTab('project')}
-              className={`rounded-[3px] px-3 py-1.5 text-[13px] font-medium transition-colors duration-150 ${
+              className={`rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors duration-150 ${
                 activeTab === 'project'
                   ? 'bg-[var(--primary)] text-white'
                   : 'text-[var(--muted)] hover:text-[var(--text)]'
@@ -229,45 +236,8 @@ export const MethodsDrawer: React.FC = () => {
                 </div>
               </section>
 
-              {/* Optional FIRMS MAP_KEY storage */}
-              <section className="space-y-2 rounded-[6px] border border-[var(--line)] bg-[var(--bg)] p-3.5">
-                <div className="flex items-center gap-2 text-[13px] font-semibold text-[var(--text)]">
-                  <KeyRound className="h-4 w-4 text-[var(--interactive)]" aria-hidden="true" />
-                  <span>{t.methodsDrawer.firmsKeyTitle}</span>
-                </div>
-                <p className="text-[12px] text-[var(--muted)]">{t.methodsDrawer.firmsKeyHelp}</p>
-                <div className="flex flex-wrap items-center gap-2">
-                  <input
-                    type="password"
-                    value={keyInput}
-                    onChange={(e) => setKeyInput(e.target.value)}
-                    placeholder={t.methodsDrawer.firmsKeyPlaceholder}
-                    className="h-9 min-w-[200px] flex-1 rounded-[4px] border border-[var(--line)] bg-[var(--surface)] px-3 font-mono-tabular text-[12px] text-[var(--text)] focus:border-[var(--interactive)] focus:outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => saveFirmsApiKey(keyInput)}
-                    className="h-9 rounded-[4px] bg-[var(--primary)] px-3 text-[12px] font-semibold text-white hover:opacity-90"
-                  >
-                    {t.methodsDrawer.saveKey}
-                  </button>
-                  {firmsApiKey && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setKeyInput('');
-                        saveFirmsApiKey('');
-                      }}
-                      className="h-9 rounded-[4px] border border-[var(--line)] bg-[var(--surface)] px-3 text-[12px] font-medium text-[var(--text)] hover:border-[var(--accent-red)]"
-                    >
-                      {t.methodsDrawer.clearKey}
-                    </button>
-                  )}
-                </div>
-              </section>
-
               {/* Scientific Disclaimer */}
-              <section className="flex items-start gap-2.5 rounded-[6px] border border-[var(--status-watch)]/40 bg-[var(--status-watch)]/10 p-3.5">
+              <section className="flex items-start gap-2.5 rounded-[12px] border border-[var(--status-watch)]/40 bg-[var(--status-watch)]/10 p-3.5">
                 <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-[var(--status-watch)]" aria-hidden="true" />
                 <div className="space-y-1 text-[12px]">
                   <div className="font-semibold text-[var(--text)]">

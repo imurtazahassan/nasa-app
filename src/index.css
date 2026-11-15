@@ -2,39 +2,39 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --bg: #F3F6FA;
+  --bg: #F1F3F4;
   --surface: #FFFFFF;
-  --raised: #E9EEF5;
-  --hud: rgba(255, 255, 255, 0.90);
-  --line: #D4DCE8;
-  --text: #0B192C;
-  --muted: #4E617D;
-  --primary: #0B3D91;
-  --interactive: #0B3D91;
-  --accent-red: #FC3D21;
-  --status-nominal: #10B981;
-  --status-watch: #F59E0B;
-  --status-warning: #F97316;
-  --status-critical: #FC3D21;
-  --status-nodata: #4E617D;
+  --raised: #E8EAED;
+  --hud: rgba(255, 255, 255, 0.96);
+  --line: #DADCE0;
+  --text: #202124;
+  --muted: #5F6368;
+  --primary: #1A73E8;
+  --interactive: #1967D2;
+  --accent-red: #EA4335;
+  --status-nominal: #1E8E3E;
+  --status-watch: #F9AB00;
+  --status-warning: #E37400;
+  --status-critical: #D93025;
+  --status-nodata: #5F6368;
 }
 
 .dark {
-  --bg: #070D19;
-  --surface: #0E1729;
-  --raised: #15223B;
-  --hud: rgba(14, 23, 41, 0.88);
-  --line: #1E2F4D;
-  --text: #F3F6FC;
-  --muted: #94A6C4;
-  --primary: #0B3D91;
-  --interactive: #5B9BFF;
-  --accent-red: #FC3D21;
-  --status-nominal: #10B981;
-  --status-watch: #F59E0B;
-  --status-warning: #F97316;
-  --status-critical: #FC3D21;
-  --status-nodata: #94A6C4;
+  --bg: #0E1014;
+  --surface: #1A1C21;
+  --raised: #262930;
+  --hud: rgba(30, 32, 38, 0.96);
+  --line: #2F333C;
+  --text: #E8EAED;
+  --muted: #9AA0A6;
+  --primary: #1A73E8;
+  --interactive: #8AB4F8;
+  --accent-red: #F28B82;
+  --status-nominal: #34A853;
+  --status-watch: #FBBC04;
+  --status-warning: #FA7B17;
+  --status-critical: #EA4335;
+  --status-nodata: #9AA0A6;
 }
 
 @layer base {
@@ -44,14 +44,16 @@
     height: 100%;
     background-color: var(--bg);
     color: var(--text);
-    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: 0.002em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   html[lang="ur"],
   html[lang="ur"] body {
-    font-family: 'Noto Naskh Arabic', 'IBM Plex Sans', sans-serif;
+    font-family: 'Noto Naskh Arabic', 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: 0;
   }
 
   *:focus-visible {
@@ -60,13 +62,28 @@
   }
 }
 
+.font-display {
+  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.015em;
+}
+
+html[lang="ur"] .font-display {
+  font-family: 'Noto Naskh Arabic', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: 0;
+}
+
 .font-mono-tabular {
-  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
   font-variant-numeric: tabular-nums;
 }
 
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+/* Subtle planetary atmosphere wash */
+.space-surface-grid {
+  background-image: radial-gradient(circle at 50% 0%, rgba(138, 180, 248, 0.05), transparent 65%);
 }
 
 /* Sequential Telemetry Lock / Systems Check progress bar */
@@ -101,8 +118,8 @@
   scrollbar-color: var(--line) transparent;
 }
 .telemetry-scroll::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 .telemetry-scroll::-webkit-scrollbar-track {
   background: transparent;
@@ -115,7 +132,7 @@
 /* Leaflet telemetry map styling */
 .leaflet-container {
   background-color: var(--bg) !important;
-  font-family: 'IBM Plex Sans', sans-serif !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
 }
 
 .earthpulse-popup .leaflet-popup-content-wrapper,
@@ -124,7 +141,7 @@
   color: var(--text) !important;
   border: 1px solid var(--line);
   border-radius: 6px !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.35) !important;
+  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.65) !important;
 }
 
 .earthpulse-popup .leaflet-popup-close-button {

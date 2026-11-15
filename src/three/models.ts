@@ -389,6 +389,7 @@ export function buildInstancedLandscape(
 ): {
   group: THREE.Group;
   updateMoistureTint: (wetness: number | null) => void;
+  updateHeights: (sampler: (x: number, z: number) => number) => void;
 } {
   const group = new THREE.Group();
   group.name = 'InstancedLandscape';
@@ -439,7 +440,7 @@ export function buildInstancedLandscape(
     return (seed - 1) / 2147483646;
   };
 
-  const treeFactors: number[] = [];
+  const treePlacements: Array<{ x: number; z: number; scale: number; yScale: number; rotY: number; factor: number }> = [];
   for (let i = 0; i < treeCount; i++) {
     let x = 0;
     let z = 0;
@@ -450,43 +451,70 @@ export function buildInstancedLandscape(
       z = Math.sin(angle) * dist;
       if (Math.abs(x - 5.2) > 2.2) break;
     }
-    const y = groundHeightAt(x, z);
     const scale = 0.85 + rand() * 0.35; // +-15% variation
-    dummy.position.set(x, y, z);
-    dummy.rotation.set(0, rand() * Math.PI * 2, 0);
-    dummy.scale.set(scale, scale * (0.9 + rand() * 0.25), scale);
-    dummy.updateMatrix();
-    trunks.setMatrixAt(i, dummy.matrix);
-    canopies.setMatrixAt(i, dummy.matrix);
-    treeFactors.push(rand());
+    treePlacements.push({
+      x,
+      z,
+      scale,
+      yScale: scale * (0.9 + rand() * 0.25),
+      rotY: rand() * Math.PI * 2,
+      factor: rand(),
+    });
   }
 
+  const rockPlacements: Array<{ x: number; z: number; s: number; rx: number; ry: number; rz: number }> = [];
   for (let i = 0; i < rockCount; i++) {
     const angle = rand() * Math.PI * 2;
     const dist = 3.2 + rand() * 22.0;
     const x = Math.cos(angle) * dist;
     const z = Math.sin(angle) * dist;
-    const y = groundHeightAt(x, z);
     const s = 0.75 + rand() * 0.5;
-    dummy.position.set(x, y - 0.05, z);
-    dummy.rotation.set(rand() * 0.4, rand() * Math.PI * 2, rand() * 0.4);
-    dummy.scale.set(s * 1.2, s * 0.72, s);
-    dummy.updateMatrix();
-    rocks.setMatrixAt(i, dummy.matrix);
+    rockPlacements.push({
+      x,
+      z,
+      s,
+      rx: rand() * 0.4,
+      ry: rand() * Math.PI * 2,
+      rz: rand() * 0.4,
+    });
 
     const shade = 0.42 + rand() * 0.22;
     color.setRGB(shade, shade + 0.02, shade + 0.05);
     rocks.setColorAt(i, color);
   }
-
-  trunks.instanceMatrix.needsUpdate = true;
-  canopies.instanceMatrix.needsUpdate = true;
-  rocks.instanceMatrix.needsUpdate = true;
   if (rocks.instanceColor) rocks.instanceColor.needsUpdate = true;
 
-  trunks.computeBoundingSphere();
-  canopies.computeBoundingSphere();
-  rocks.computeBoundingSphere();
+  function updateHeights(sampler: (x: number, z: number) => number) {
+    for (let i = 0; i < treeCount; i++) {
+      const t = treePlacements[i];
+      const y = sampler(t.x, t.z);
+      dummy.position.set(t.x, y, t.z);
+      dummy.rotation.set(0, t.rotY, 0);
+      dummy.scale.set(t.scale, t.yScale, t.scale);
+      dummy.updateMatrix();
+      trunks.setMatrixAt(i, dummy.matrix);
+      canopies.setMatrixAt(i, dummy.matrix);
+    }
+
+    for (let i = 0; i < rockCount; i++) {
+      const r = rockPlacements[i];
+      const y = sampler(r.x, r.z);
+      dummy.position.set(r.x, y - 0.05, r.z);
+      dummy.rotation.set(r.rx, r.ry, r.rz);
+      dummy.scale.set(r.s * 1.2, r.s * 0.72, r.s);
+      dummy.updateMatrix();
+      rocks.setMatrixAt(i, dummy.matrix);
+    }
+
+    trunks.instanceMatrix.needsUpdate = true;
+    canopies.instanceMatrix.needsUpdate = true;
+    rocks.instanceMatrix.needsUpdate = true;
+    trunks.computeBoundingSphere();
+    canopies.computeBoundingSphere();
+    rocks.computeBoundingSphere();
+  }
+
+  updateHeights(groundHeightAt);
 
   group.add(trunks, canopies, rocks);
 
@@ -503,7 +531,7 @@ export function buildInstancedLandscape(
         : healthyColor.clone().lerp(lushColor, THREE.MathUtils.clamp((w - 0.35) / 0.65, 0, 1));
 
     for (let i = 0; i < treeCount; i++) {
-      const f = treeFactors[i];
+      const f = treePlacements[i].factor;
       color.copy(base).offsetHSL((f - 0.5) * 0.04, (f - 0.5) * 0.08, (f - 0.5) * 0.08);
       canopies.setColorAt(i, color);
     }
@@ -512,7 +540,7 @@ export function buildInstancedLandscape(
 
   updateMoistureTint(gwetRoot);
 
-  return { group, updateMoistureTint };
+  return { group, updateMoistureTint, updateHeights };
 }
 
 /**

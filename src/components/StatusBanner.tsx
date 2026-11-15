@@ -57,9 +57,15 @@ export const StatusBanner: React.FC = () => {
   return (
     <section
       aria-live="polite"
-      className="space-y-3 rounded-[6px] border border-[var(--line)] border-s-4 bg-[var(--surface)] p-3.5"
-      style={{ borderInlineStartColor: statusColor }}
+      className="relative overflow-hidden space-y-3 rounded-[14px] border border-[var(--line)] bg-[var(--surface)]/95 p-4 pt-4"
     >
+      {/* Calibrated 2px top status hairline */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 h-[2px]"
+        style={{ backgroundColor: statusColor }}
+      />
+
       {/* Top metadata line */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="min-w-0">
@@ -70,10 +76,10 @@ export const StatusBanner: React.FC = () => {
               {radiusKm} km
             </span>
           </div>
-          <h1 className="mt-0.5 truncate text-[18px] font-bold tracking-tight text-[var(--text)]">
+          <h1 className="font-display mt-0.5 truncate text-[19px] font-bold tracking-tight text-[var(--text)]">
             {location.name}
             {location.country ? (
-              <span className="ms-1.5 text-[14px] font-normal text-[var(--muted)]">
+              <span className="ms-1.5 font-sans text-[13px] font-normal text-[var(--muted)]">
                 {location.country}
               </span>
             ) : null}
@@ -112,7 +118,7 @@ export const StatusBanner: React.FC = () => {
         <button
           type="button"
           onClick={handleShare}
-          className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-[4px] bg-[var(--primary)] px-3 text-[12px] font-semibold text-white transition-opacity duration-150 hover:opacity-90"
+          className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-[var(--primary)] px-3.5 text-[12px] font-semibold text-white transition-opacity duration-150 hover:opacity-90"
         >
           <Share2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
           <span>{t.shareAlert}</span>
@@ -120,7 +126,7 @@ export const StatusBanner: React.FC = () => {
         <button
           type="button"
           onClick={handlePrint}
-          className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-[4px] border border-[var(--line)] bg-[var(--bg)] px-3 text-[12px] font-medium text-[var(--text)] transition-colors duration-150 hover:border-[var(--interactive)] hover:bg-[var(--raised)]"
+          className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--line)] bg-[var(--bg)] px-3.5 text-[12px] font-medium text-[var(--text)] transition-colors duration-150 hover:border-[var(--interactive)] hover:bg-[var(--raised)]"
         >
           <Printer className="h-3.5 w-3.5 shrink-0 text-[var(--muted)]" aria-hidden="true" />
           <span>{t.printBrief}</span>
@@ -129,7 +135,7 @@ export const StatusBanner: React.FC = () => {
 
       {/* Persona-specific contextual callout */}
       {persona === 'farmer' && (
-        <div className="rounded-[4px] border border-[var(--line)] bg-[var(--bg)] p-2.5">
+        <div className="rounded-[10px] border border-[var(--line)] bg-[var(--bg)] p-3">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 text-[12px] font-semibold text-[var(--text)]">
               <CloudRain className="h-3.5 w-3.5 text-[var(--interactive)]" aria-hidden="true" />
@@ -146,7 +152,7 @@ export const StatusBanner: React.FC = () => {
       )}
 
       {persona === 'hiker' && (
-        <div className="flex items-center justify-between gap-2 rounded-[4px] border border-[var(--line)] bg-[var(--bg)] p-2.5">
+        <div className="flex items-center justify-between gap-2 rounded-[10px] border border-[var(--line)] bg-[var(--bg)] p-3">
           <div className="flex items-center gap-1.5 text-[12px] font-semibold text-[var(--text)]">
             <Thermometer
               className={`h-3.5 w-3.5 ${
@@ -167,12 +173,12 @@ export const StatusBanner: React.FC = () => {
                 : '--'}
             </span>
             <span
-              className={`rounded-[4px] px-1.5 py-0.5 text-[11px] font-semibold ${
+              className={`text-[11px] font-semibold ${
                 insights.hikerHeatLevel === 'danger'
-                  ? 'bg-[var(--status-critical)]/15 text-[var(--status-critical)]'
+                  ? 'text-[var(--status-critical)]'
                   : insights.hikerHeatLevel === 'caution'
-                  ? 'bg-[var(--status-watch)]/15 text-[var(--status-watch)]'
-                  : 'bg-[var(--raised)] text-[var(--muted)]'
+                  ? 'text-[var(--status-watch)]'
+                  : 'text-[var(--muted)]'
               }`}
             >
               {insights.hikerHeatLevel === 'danger'
@@ -186,7 +192,7 @@ export const StatusBanner: React.FC = () => {
       )}
 
       {persona === 'responder' && (
-        <div className="rounded-[4px] border border-[var(--line)] bg-[var(--bg)] p-2.5">
+        <div className="rounded-[10px] border border-[var(--line)] bg-[var(--bg)] p-3">
           <div className="mb-1.5 flex items-center justify-between text-[12px] font-semibold text-[var(--text)]">
             <span className="flex items-center gap-1.5">
               <Compass className="h-3.5 w-3.5 text-[var(--interactive)]" aria-hidden="true" />
@@ -220,7 +226,7 @@ export const StatusBanner: React.FC = () => {
       )}
 
       {persona === 'planner' && (
-        <div className="rounded-[4px] border border-[var(--line)] bg-[var(--bg)] p-2.5">
+        <div className="rounded-[10px] border border-[var(--line)] bg-[var(--bg)] p-3">
           <div className="mb-2 text-[12px] font-semibold text-[var(--text)]">
             {t.personaCallouts.plannerTitle}
           </div>

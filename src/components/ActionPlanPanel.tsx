@@ -22,7 +22,7 @@ export const ActionPlanPanel: React.FC = () => {
         <button
           type="button"
           onClick={() => setChecked({})}
-          className="inline-flex shrink-0 items-center gap-1 rounded-[4px] border border-[var(--line)] bg-[var(--bg)] px-2 py-1 text-[11px] font-medium text-[var(--muted)] hover:text-[var(--text)]"
+          className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--line)] bg-[var(--bg)] px-2.5 py-1 text-[11px] font-medium text-[var(--muted)] hover:text-[var(--text)]"
         >
           <RotateCcw className="h-3 w-3" aria-hidden="true" />
           <span>{t.actionsPanel.resetChecklist}</span>
@@ -37,7 +37,7 @@ export const ActionPlanPanel: React.FC = () => {
           return (
             <section
               key={hazardId}
-              className="rounded-[6px] border border-[var(--line)] bg-[var(--bg)] p-3"
+              className="rounded-[12px] border border-[var(--line)] bg-[var(--bg)] p-3.5"
             >
               <div className="mb-2 flex items-center justify-between gap-2">
                 <h3 className="text-[14px] font-semibold text-[var(--text)]">

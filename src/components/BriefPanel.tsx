@@ -28,7 +28,7 @@ export const BriefPanel: React.FC = () => {
           type="button"
           onClick={refreshBrief}
           disabled={briefLoading}
-          className="inline-flex h-7 items-center gap-1 rounded-[4px] border border-[var(--line)] bg-[var(--bg)] px-2 text-[11px] font-medium text-[var(--text)] hover:border-[var(--interactive)] disabled:opacity-50"
+          className="inline-flex h-7 items-center gap-1 rounded-full border border-[var(--line)] bg-[var(--bg)] px-2.5 text-[11px] font-medium text-[var(--text)] hover:border-[var(--interactive)] disabled:opacity-50"
         >
           <RefreshCw
             className={`h-3 w-3 ${briefLoading ? 'animate-spin text-[var(--interactive)]' : ''}`}
@@ -39,7 +39,7 @@ export const BriefPanel: React.FC = () => {
       </div>
 
       {/* Headline & Summary */}
-      <div className="space-y-2 rounded-[6px] border border-[var(--line)] bg-[var(--bg)] p-3.5">
+      <div className="space-y-2 rounded-[12px] border border-[var(--line)] bg-[var(--bg)] p-3.5">
         <h3 className="text-balance text-[16px] font-bold leading-snug text-[var(--text)]">
           {brief.headline}
         </h3>
@@ -58,9 +58,9 @@ export const BriefPanel: React.FC = () => {
           {brief.topActions.map((act, idx) => (
             <li
               key={idx}
-              className="flex items-start gap-2.5 rounded-[6px] border border-[var(--line)] bg-[var(--bg)] p-2.5 text-[13px] leading-snug text-[var(--text)]"
+              className="flex items-start gap-2.5 rounded-[10px] border border-[var(--line)] bg-[var(--bg)] p-3 text-[13px] leading-snug text-[var(--text)]"
             >
-              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-[4px] bg-[var(--primary)] font-mono-tabular text-[11px] font-semibold text-white">
+              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] font-mono-tabular text-[11px] font-semibold text-white">
                 {idx + 1}
               </span>
               <span>{act}</span>

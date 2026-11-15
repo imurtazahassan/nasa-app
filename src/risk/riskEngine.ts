@@ -202,9 +202,9 @@ function evaluateWildfire(
 
   const rawInputs = [
     {
-      label: 'FIRMS VIIRS Detections',
+      label: 'Active Fire Feed',
       value: firmsEnv.data?.fallbackMode
-        ? 'EONET + GIBS fallback mode'
+        ? 'NASA EONET + GIBS Thermal (Keyless)'
         : `${firmsDetections.length} points within ${radiusKm} km`,
     },
     {

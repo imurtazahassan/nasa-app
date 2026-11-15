@@ -3,6 +3,8 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { processBriefRequest, processChatRequest } from './server/geminiCore';
+import { processFirmsProxyRequest } from './server/firmsCore';
+import type { RadiusKm } from './src/types/telemetry';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,6 +23,23 @@ async function startServer() {
 
   app.post('/api/gemini/chat', async (req, res) => {
     const result = await processChatRequest(req.body);
+    res.status(result.status).json(result.body);
+  });
+
+  app.get('/api/firms', async (req, res) => {
+    const lat = Number.parseFloat(String(req.query.lat ?? ''));
+    const lon = Number.parseFloat(String(req.query.lon ?? ''));
+    const rRaw = Number.parseInt(String(req.query.radiusKm ?? '50'), 10);
+    const radiusKm: RadiusKm = rRaw === 25 || rRaw === 100 ? rRaw : 50;
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      res.status(400).json({ error: 'Invalid lat/lon coordinates' });
+      return;
+    }
+
+    const headerKey = req.headers['x-firms-key'];
+    const userKey = Array.isArray(headerKey) ? headerKey[0] : headerKey;
+    const result = await processFirmsProxyRequest({ lat, lon, radiusKm, userKey });
     res.status(result.status).json(result.body);
   });
 

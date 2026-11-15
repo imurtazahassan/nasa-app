@@ -14,6 +14,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { HazardModule } from './components/HazardModule';
 import { MapView } from './components/MapView';
 import { MethodsDrawer } from './components/MethodsDrawer';
+import { SpaceBackdrop } from './components/SpaceBackdrop';
 import { StatusBanner } from './components/StatusBanner';
 import { TopBar } from './components/TopBar';
 import { getActionPlanSteps } from './content/actionPlans';
@@ -52,10 +53,12 @@ const WorkspaceContent: React.FC = () => {
   );
 
   return (
-    <div className="flex h-dvh w-full flex-col overflow-hidden bg-[var(--bg)] text-[var(--text)]">
+    <div className="relative flex h-dvh w-full flex-col overflow-hidden bg-[var(--bg)] text-[var(--text)]">
+      <SpaceBackdrop />
+
       {/* Demo Scenario Active Banner */}
       {activeScenarioId !== 'live' && (
-        <div className="no-print flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--status-warning)]/40 bg-[var(--status-warning)]/15 px-4 py-1.5 text-[12px]">
+        <div className="no-print relative z-20 flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--status-warning)]/40 bg-[var(--status-warning)]/15 px-4 py-1.5 text-[12px]">
           <div className="flex items-center gap-2 font-semibold text-[var(--status-warning)]">
             <FlaskConical className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             <span>{t.demoBanner}</span>
@@ -74,7 +77,7 @@ const WorkspaceContent: React.FC = () => {
       <TopBar />
 
       {/* Desktop 3-Column Aerospace Telemetry Workspace (>= 1024px) */}
-      <main className="no-print hidden min-h-0 flex-1 grid-cols-[410px_1fr_380px] gap-3 p-3 lg:grid">
+      <main className="no-print relative z-10 hidden min-h-0 flex-1 grid-cols-[410px_1fr_380px] gap-3 p-3 lg:grid">
         {/* Left Telemetry Rail */}
         <aside className="flex min-h-0 flex-col overflow-y-auto pe-1 telemetry-scroll">
           <div className="space-y-3 pb-3">
@@ -100,15 +103,15 @@ const WorkspaceContent: React.FC = () => {
         </section>
 
         {/* Right Intelligence Deck */}
-        <aside className="flex min-h-0 flex-col rounded-[6px] border border-[var(--line)] bg-[var(--surface)]">
+        <aside className="flex min-h-0 flex-col overflow-hidden rounded-[14px] border border-[var(--line)] bg-[var(--surface)]/95">
           <ErrorBoundary title="Intelligence Deck">
             {/* Segmented Tab Bar */}
-            <div className="shrink-0 border-b border-[var(--line)] p-2">
-              <div className="grid grid-cols-3 gap-1 rounded-[4px] border border-[var(--line)] bg-[var(--bg)] p-0.5">
+            <div className="shrink-0 border-b border-[var(--line)] p-2.5">
+              <div className="grid grid-cols-3 gap-1 rounded-full border border-[var(--line)] bg-[var(--bg)] p-0.5">
                 <button
                   type="button"
                   onClick={() => setRightTab('brief')}
-                  className={`flex items-center justify-center gap-1.5 rounded-[3px] py-1.5 text-[12px] font-medium transition-colors duration-150 ${
+                  className={`flex items-center justify-center gap-1.5 rounded-full py-1.5 text-[12px] font-medium transition-colors duration-150 ${
                     rightTab === 'brief'
                       ? 'bg-[var(--primary)] text-white'
                       : 'text-[var(--muted)] hover:text-[var(--text)]'
@@ -120,7 +123,7 @@ const WorkspaceContent: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setRightTab('ask')}
-                  className={`flex items-center justify-center gap-1.5 rounded-[3px] py-1.5 text-[12px] font-medium transition-colors duration-150 ${
+                  className={`flex items-center justify-center gap-1.5 rounded-full py-1.5 text-[12px] font-medium transition-colors duration-150 ${
                     rightTab === 'ask'
                       ? 'bg-[var(--primary)] text-white'
                       : 'text-[var(--muted)] hover:text-[var(--text)]'
@@ -132,7 +135,7 @@ const WorkspaceContent: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setRightTab('actions')}
-                  className={`flex items-center justify-center gap-1.5 rounded-[3px] py-1.5 text-[12px] font-medium transition-colors duration-150 ${
+                  className={`flex items-center justify-center gap-1.5 rounded-full py-1.5 text-[12px] font-medium transition-colors duration-150 ${
                     rightTab === 'actions'
                       ? 'bg-[var(--primary)] text-white'
                       : 'text-[var(--muted)] hover:text-[var(--text)]'
@@ -152,7 +155,7 @@ const WorkspaceContent: React.FC = () => {
             </div>
 
             {/* Persistent Safety Disclaimer Footer */}
-            <footer className="shrink-0 border-t border-[var(--line)] bg-[var(--bg)] px-3.5 py-2.5 text-[11px] leading-snug text-[var(--muted)]">
+            <footer className="shrink-0 border-t border-[var(--line)] bg-[var(--bg)] px-4 py-2.5 text-[11px] leading-snug text-[var(--muted)]">
               <p>{t.footer.safety}</p>
               <p className="mt-0.5 font-semibold text-[var(--text)]">{emergencyText}</p>
             </footer>

@@ -12,13 +12,13 @@ import type { SeverityStatus } from '../types/telemetry';
 export function getStatusColor(status: SeverityStatus): string {
   switch (status) {
     case 'critical':
-      return '#FC3D21';
+      return '#EA4335';
     case 'warning':
-      return '#F97316';
+      return '#FA7B17';
     case 'watch':
-      return '#F59E0B';
+      return '#FBBC04';
     case 'nominal':
-      return '#10B981';
+      return '#34A853';
     default:
       return 'var(--muted)';
   }
@@ -45,12 +45,8 @@ export const StatusGlyph: React.FC<{
 
   return (
     <span
-      className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-[4px] border px-2 py-0.5 text-[12px] font-semibold tracking-tight"
-      style={{
-        color,
-        borderColor: status === 'nodata' ? 'var(--line)' : `${color}45`,
-        backgroundColor: status === 'nodata' ? 'var(--raised)' : `${color}14`,
-      }}
+      className="inline-flex items-center gap-1.5 whitespace-nowrap text-[12px] font-semibold tracking-tight"
+      style={{ color }}
     >
       <Icon className={iconClass} aria-hidden="true" />
       <span>{t.statuses[status]}</span>

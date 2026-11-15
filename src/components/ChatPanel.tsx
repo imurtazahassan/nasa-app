@@ -109,7 +109,7 @@ export const ChatPanel: React.FC = () => {
               type="button"
               disabled={chatLoading}
               onClick={() => void sendChatQuestion(q)}
-              className="rounded-[4px] border border-[var(--line)] bg-[var(--bg)] px-2.5 py-1.5 text-start text-[12px] text-[var(--text)] transition-colors duration-150 hover:border-[var(--interactive)] hover:bg-[var(--raised)] disabled:opacity-50"
+              className="rounded-[10px] border border-[var(--line)] bg-[var(--bg)] px-3 py-2 text-start text-[12px] text-[var(--text)] transition-colors duration-150 hover:border-[var(--interactive)] hover:bg-[var(--raised)] disabled:opacity-50"
             >
               {q}
             </button>
@@ -120,14 +120,14 @@ export const ChatPanel: React.FC = () => {
       {/* Conversation feed */}
       <div className="flex-1 space-y-2.5 overflow-y-auto py-1 telemetry-scroll">
         {chatMessages.length === 0 ? (
-          <p className="rounded-[6px] border border-dashed border-[var(--line)] p-3 text-center text-[12px] text-[var(--muted)]">
+          <p className="rounded-[12px] border border-dashed border-[var(--line)] p-3.5 text-center text-[12px] text-[var(--muted)]">
             {t.chatPanel.emptyPrompt}
           </p>
         ) : (
           chatMessages.map((msg) => (
             <div
               key={msg.id}
-              className={`rounded-[6px] border p-2.5 text-[13px] leading-relaxed ${
+              className={`rounded-[12px] border p-3 text-[13px] leading-relaxed ${
                 msg.role === 'user'
                   ? 'ms-6 border-[var(--primary)]/40 bg-[var(--primary)]/10 text-[var(--text)]'
                   : 'me-4 border-[var(--line)] bg-[var(--bg)] text-[var(--text)]'
@@ -139,7 +139,7 @@ export const ChatPanel: React.FC = () => {
         )}
 
         {chatLoading && (
-          <div className="flex items-center gap-2 rounded-[6px] border border-[var(--line)] bg-[var(--bg)] p-2.5 text-[12px] text-[var(--muted)]">
+          <div className="flex items-center gap-2 rounded-[12px] border border-[var(--line)] bg-[var(--bg)] p-3 text-[12px] text-[var(--muted)]">
             <Loader2 className="h-3.5 w-3.5 animate-spin text-[var(--interactive)]" aria-hidden="true" />
             <span>Analyzing active telemetry…</span>
           </div>
@@ -154,13 +154,13 @@ export const ChatPanel: React.FC = () => {
           onChange={(e) => setInput(e.target.value)}
           placeholder={t.chatPanel.placeholder}
           aria-label={t.chatPanel.placeholder}
-          className="h-9 min-w-0 flex-1 rounded-[4px] border border-[var(--line)] bg-[var(--bg)] px-3 text-[13px] text-[var(--text)] placeholder:text-[var(--muted)] focus:border-[var(--interactive)] focus:outline-none"
+          className="h-9 min-w-0 flex-1 rounded-full border border-[var(--line)] bg-[var(--bg)] px-3.5 text-[13px] text-[var(--text)] placeholder:text-[var(--muted)] focus:border-[var(--interactive)] focus:outline-none"
         />
         <button
           type="submit"
           disabled={!input.trim() || chatLoading}
           aria-label={t.chatPanel.send}
-          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[4px] bg-[var(--primary)] px-3 text-[12px] font-semibold text-white transition-opacity duration-150 hover:opacity-90 disabled:opacity-45"
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-[var(--primary)] px-3.5 text-[12px] font-semibold text-white transition-opacity duration-150 hover:opacity-90 disabled:opacity-45"
         >
           <Send className="h-3.5 w-3.5" aria-hidden="true" />
           <span>{t.chatPanel.send}</span>

@@ -22,7 +22,7 @@ export const DateScrubber: React.FC<DateScrubberProps> = ({ viewMode, onChangeVi
   return (
     <div
       dir="ltr"
-      className="flex flex-wrap items-center justify-between gap-2.5 rounded-[6px] border border-[var(--line)] bg-[var(--hud)] px-3 py-2 backdrop-blur-md"
+      className="flex flex-wrap items-center justify-between gap-2.5 rounded-2xl border border-[var(--line)] bg-[var(--hud)] px-3.5 py-2 shadow-xl backdrop-blur-md sm:rounded-full"
     >
       <div className="flex items-center gap-2">
         <Calendar className="h-3.5 w-3.5 shrink-0 text-[var(--interactive)]" aria-hidden="true" />
@@ -40,7 +40,7 @@ export const DateScrubber: React.FC<DateScrubberProps> = ({ viewMode, onChangeVi
           onClick={() => setSelectedDateOffset(Math.max(-6, selectedDateOffset - 1))}
           disabled={selectedDateOffset <= -6}
           aria-label="Previous day"
-          className="inline-flex h-7 w-7 items-center justify-center rounded-[4px] border border-[var(--line)] bg-[var(--surface)] text-[var(--text)] disabled:opacity-40 hover:border-[var(--interactive)]"
+          className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--text)] disabled:opacity-40 hover:border-[var(--interactive)]"
         >
           <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
         </button>
@@ -61,7 +61,7 @@ export const DateScrubber: React.FC<DateScrubberProps> = ({ viewMode, onChangeVi
           onClick={() => setSelectedDateOffset(Math.min(0, selectedDateOffset + 1))}
           disabled={selectedDateOffset >= 0}
           aria-label="Next day"
-          className="inline-flex h-7 w-7 items-center justify-center rounded-[4px] border border-[var(--line)] bg-[var(--surface)] text-[var(--text)] disabled:opacity-40 hover:border-[var(--interactive)]"
+          className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--text)] disabled:opacity-40 hover:border-[var(--interactive)]"
         >
           <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
         </button>

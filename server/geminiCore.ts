@@ -84,7 +84,7 @@ STRICT GROUNDING RULES:
 
     const text = (response.text ?? '').trim();
     if (!text) {
-      return { status: 502, body: { error: 'Empty Gemini response' } };
+      return { status: 200, body: { mode: 'offline', reason: 'empty_response' } };
     }
 
     const parsed = JSON.parse(text) as {
@@ -106,9 +106,8 @@ STRICT GROUNDING RULES:
         },
       },
     };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Gemini brief generation failed';
-    return { status: 502, body: { error: message } };
+  } catch {
+    return { status: 200, body: { mode: 'offline', reason: 'gemini_unavailable' } };
   }
 }
 
@@ -149,12 +148,11 @@ RULES:
 
     const text = (response.text ?? '').trim();
     if (!text) {
-      return { status: 502, body: { error: 'Empty Gemini response' } };
+      return { status: 200, body: { mode: 'offline', reason: 'empty_response' } };
     }
 
     return { status: 200, body: { mode: 'gemini', answer: text } };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Gemini chat failed';
-    return { status: 502, body: { error: message } };
+  } catch {
+    return { status: 200, body: { mode: 'offline', reason: 'gemini_unavailable' } };
   }
 }

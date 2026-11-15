@@ -97,7 +97,7 @@ export const MapView: React.FC = () => {
   } = useApp();
 
   const [useModisFallback, setUseModisFallback] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewportMode>('map');
+  const [viewMode, setViewMode] = useState<ViewportMode>('3d');
   const [layersOpen, setLayersOpen] = useState(true);
 
   useEffect(() => {
@@ -153,57 +153,22 @@ export const MapView: React.FC = () => {
   }, [firmsDetections, eonetEvents]);
 
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-[6px] border border-[var(--line)] bg-[var(--bg)]">
-      {/* 12x12 SVG blueprint viewfinder corner brackets */}
-      <svg
-        className="pointer-events-none absolute start-1.5 top-1.5 z-[500] h-3 w-3 text-[var(--interactive)]"
-        viewBox="0 0 12 12"
-        fill="none"
-        aria-hidden="true"
-      >
-        <path d="M1 11V1H11" stroke="currentColor" strokeWidth="1.5" />
-      </svg>
-      <svg
-        className="pointer-events-none absolute end-1.5 top-1.5 z-[500] h-3 w-3 text-[var(--interactive)]"
-        viewBox="0 0 12 12"
-        fill="none"
-        aria-hidden="true"
-      >
-        <path d="M1 1H11V11" stroke="currentColor" strokeWidth="1.5" />
-      </svg>
-      <svg
-        className="pointer-events-none absolute bottom-1.5 start-1.5 z-[500] h-3 w-3 text-[var(--interactive)]"
-        viewBox="0 0 12 12"
-        fill="none"
-        aria-hidden="true"
-      >
-        <path d="M1 1V11H11" stroke="currentColor" strokeWidth="1.5" />
-      </svg>
-      <svg
-        className="pointer-events-none absolute bottom-1.5 end-1.5 z-[500] h-3 w-3 text-[var(--interactive)]"
-        viewBox="0 0 12 12"
-        fill="none"
-        aria-hidden="true"
-      >
-        <path d="M11 1V11H1" stroke="currentColor" strokeWidth="1.5" />
-      </svg>
-
-      {/* Top-left floating HUD: Active satellite layer + Coordinates (only in 2D Map / Table modes; zero backdrop-filter over 3D WebGL) */}
+    <div className="relative h-full w-full overflow-hidden rounded-[14px] border border-[var(--line)] bg-[var(--bg)]">
+      {/* Top-left floating HUD: Active satellite layer + Coordinates (only in 2D Map / Table modes) */}
       {viewMode !== '3d' && (
         <div
           dir="ltr"
-          className="pointer-events-none absolute start-3 top-3 z-[450] flex max-w-[60%] flex-col gap-1"
+          className="pointer-events-none absolute start-3 top-3 z-[450] flex max-w-[60%] items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--hud)] px-3.5 py-1.5 text-[11px] shadow-lg"
         >
-          <div className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--hud)] px-3 py-1 text-[12px] backdrop-blur-md">
-            <Radio className="h-3.5 w-3.5 shrink-0 text-[var(--interactive)]" aria-hidden="true" />
-            <span className="truncate font-medium text-[var(--text)]">
-              {t.mapLayers.activeLayer}: {activeBaseLabel}
-            </span>
-          </div>
-          <div className="pointer-events-auto inline-flex w-fit items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--hud)] px-3 py-1 font-mono-tabular text-[11px] text-[var(--muted)] backdrop-blur-md">
-            <Crosshair className="h-3 w-3 shrink-0 text-[var(--interactive)]" aria-hidden="true" />
-            <span>{formatCoordinates(location.lat, location.lon)}</span>
-          </div>
+          <Radio className="h-3.5 w-3.5 shrink-0 text-[var(--interactive)]" aria-hidden="true" />
+          <span className="truncate font-medium text-[var(--text)]">
+            {t.mapLayers.activeLayer}: {activeBaseLabel}
+          </span>
+          <span className="text-[var(--muted)]" aria-hidden="true">·</span>
+          <Crosshair className="h-3 w-3 shrink-0 text-[var(--interactive)]" aria-hidden="true" />
+          <span className="font-mono-tabular text-[var(--muted)]">
+            {formatCoordinates(location.lat, location.lon)}
+          </span>
         </div>
       )}
 
@@ -214,7 +179,7 @@ export const MapView: React.FC = () => {
             <button
               type="button"
               onClick={() => setViewMode('3d')}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--hud)] px-3 py-1 text-[12px] font-medium text-[var(--text)] backdrop-blur-md hover:border-[var(--interactive)]"
+              className="inline-flex h-8 items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--hud)] px-3.5 text-[12px] font-medium text-[var(--text)] shadow-lg hover:border-[var(--interactive)]"
             >
               <Box className="h-3.5 w-3.5 text-[var(--interactive)]" aria-hidden="true" />
               <span>{t.mapLayers.threeDScene}</span>
@@ -222,7 +187,7 @@ export const MapView: React.FC = () => {
             <button
               type="button"
               onClick={() => setLayersOpen((o) => !o)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--hud)] px-3 py-1 text-[12px] font-medium text-[var(--text)] backdrop-blur-md hover:border-[var(--interactive)]"
+              className="inline-flex h-8 items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--hud)] px-3.5 text-[12px] font-medium text-[var(--text)] shadow-lg hover:border-[var(--interactive)]"
             >
               <Layers className="h-3.5 w-3.5 text-[var(--interactive)]" aria-hidden="true" />
               <span>Layers</span>
@@ -230,7 +195,7 @@ export const MapView: React.FC = () => {
           </div>
 
           {layersOpen && viewMode === 'map' && (
-            <div className="flex max-w-[220px] flex-wrap justify-end gap-1 rounded-[6px] border border-[var(--line)] bg-[var(--hud)] p-1.5 backdrop-blur-md">
+            <div className="flex max-w-[235px] flex-wrap justify-end gap-1 rounded-[14px] border border-[var(--line)] bg-[var(--hud)] p-2 shadow-xl">
               {(
                 [
                   ['trueColor', t.mapLayers.trueColor],
@@ -246,7 +211,7 @@ export const MapView: React.FC = () => {
                   key={key}
                   type="button"
                   onClick={() => toggleMapLayer(key)}
-                  className={`whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors duration-150 ${
+                  className={`whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[11px] font-medium transition-colors duration-150 ${
                     mapLayers[key]
                       ? 'border-[var(--interactive)] bg-[var(--primary)] text-white'
                       : 'border-[var(--line)] bg-[var(--surface)] text-[var(--muted)] hover:text-[var(--text)]'
@@ -501,7 +466,7 @@ export const MapView: React.FC = () => {
       {viewMode !== '3d' && (
         <div className="absolute bottom-3 end-3 start-3 z-[450] space-y-1.5">
           <div className="hidden justify-center sm:flex">
-            <span className="rounded-full border border-[var(--line)] bg-[var(--hud)] px-2.5 py-0.5 text-[11px] text-[var(--muted)] backdrop-blur-md">
+            <span className="rounded-md bg-[var(--hud)] px-2.5 py-0.5 text-[11px] text-[var(--muted)] shadow-sm">
               {t.mapLayers.tapToInspect}
             </span>
           </div>

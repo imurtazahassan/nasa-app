@@ -18,6 +18,12 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import type { SeverityStatus } from '../types/telemetry';
+import { formatCoordinates } from '../utils/geo';
+import {
+  fetchDemElevationGrid,
+  makeDemHeightSampler,
+  type ElevationGrid,
+} from '../services/elevation';
 import {
   buildHazardBeacon,
   buildInstancedLandscape,
@@ -123,6 +129,7 @@ export const Scene3DView: React.FC<{
   const [hudVisible, setHudVisible] = useState(true);
   const [expanded, setExpanded] = useState(false);
   const [webglError, setWebglError] = useState<string | null>(null);
+  const [demGrid, setDemGrid] = useState<ElevationGrid | null>(null);
 
   // Live mutable refs read inside the WebGL loop without re-creating the renderer
   const liveStateRef = useRef({
@@ -168,6 +175,7 @@ export const Scene3DView: React.FC<{
     statusDomeMat: THREE.MeshPhysicalMaterial;
     landscapeGroup: THREE.Group;
     updateMoistureTint: (w: number | null) => void;
+    updateHeights: (sampler: (x: number, z: number) => number) => void;
     satelliteGroup: THREE.Group;
     scanCone: THREE.Mesh;
     hazardGroup: THREE.Group;
@@ -175,6 +183,8 @@ export const Scene3DView: React.FC<{
     particles: THREE.Points;
     particlePositions: Float32Array;
     particleMode: 'rain' | 'haze' | 'clear';
+    starField: THREE.Points;
+    orbitTrack: THREE.LineLoop;
     shadowTex: THREE.CanvasTexture;
     groundHeightAt: (x: number, z: number) => number;
   } | null>(null);
@@ -245,9 +255,9 @@ export const Scene3DView: React.FC<{
     renderer.domElement.addEventListener('webglcontextrestored', onContextRestored);
 
     const scene = new THREE.Scene();
-    const initialBg = liveStateRef.current.theme === 'dark' ? 0x091324 : 0xcfe0f5;
+    const initialBg = liveStateRef.current.theme === 'dark' ? 0x0b0d12 : 0xd6e6f8;
     scene.background = new THREE.Color(initialBg);
-    scene.fog = new THREE.FogExp2(initialBg, 0.0145);
+    scene.fog = new THREE.FogExp2(initialBg, liveStateRef.current.theme === 'dark' ? 0.0105 : 0.014);
 
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     const roomEnv = new RoomEnvironment();
@@ -366,7 +376,7 @@ export const Scene3DView: React.FC<{
     scene.add(stationGroup);
 
     // Instanced Trees & Rocks
-    const { group: landscapeGroup, updateMoistureTint } = buildInstancedLandscape(
+    const { group: landscapeGroup, updateMoistureTint, updateHeights } = buildInstancedLandscape(
       groundHeightAt,
       telemetry.power.data?.latestGwetRoot ?? null
     );
@@ -406,6 +416,58 @@ export const Scene3DView: React.FC<{
     const particles = new THREE.Points(particleGeo, particleMat);
     scene.add(particles);
 
+    // Deep-Space Procedural Starfield Dome (900 stars, visible in dark space mode)
+    const starCount = 900;
+    const starPositions = new Float32Array(starCount * 3);
+    let starSeed = 9187;
+    const starRand = () => {
+      starSeed = (starSeed * 16807) % 2147483647;
+      return (starSeed - 1) / 2147483646;
+    };
+    for (let i = 0; i < starCount; i++) {
+      const theta = starRand() * Math.PI * 2;
+      const phi = Math.acos(starRand() * 0.85 + 0.08);
+      const r = 82 + starRand() * 28;
+      starPositions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+      starPositions[i * 3 + 1] = r * Math.cos(phi) + 4;
+      starPositions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+    }
+    const starGeo = new THREE.BufferGeometry();
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+    const starMat = new THREE.PointsMaterial({
+      color: 0xdbeafe,
+      size: 1.75,
+      sizeAttenuation: false,
+      transparent: true,
+      opacity: 0.85,
+      depthWrite: false,
+      fog: false,
+    });
+    const starField = new THREE.Points(starGeo, starMat);
+    starField.visible = liveStateRef.current.theme === 'dark';
+    scene.add(starField);
+
+    // Orbital Flight Path Ring along satellite trajectory (14.5 x 10.5 ellipse at y=13.5)
+    const trackPts: THREE.Vector3[] = [];
+    for (let i = 0; i <= 96; i++) {
+      const a = (i / 96) * Math.PI * 2;
+      trackPts.push(
+        new THREE.Vector3(
+          Math.cos(a) * 14.5,
+          13.5 + Math.sin(a * 2) * 0.65,
+          Math.sin(a) * 10.5
+        )
+      );
+    }
+    const trackGeo = new THREE.BufferGeometry().setFromPoints(trackPts);
+    const trackMat = new THREE.LineBasicMaterial({
+      color: 0x8ab4f8,
+      transparent: true,
+      opacity: 0.36,
+    });
+    const orbitTrack = new THREE.LineLoop(trackGeo, trackMat);
+    scene.add(orbitTrack);
+
     sceneHandlesRef.current = {
       scene,
       renderer,
@@ -425,6 +487,7 @@ export const Scene3DView: React.FC<{
       statusDomeMat,
       landscapeGroup,
       updateMoistureTint,
+      updateHeights,
       satelliteGroup,
       scanCone,
       hazardGroup,
@@ -432,6 +495,8 @@ export const Scene3DView: React.FC<{
       particles,
       particlePositions,
       particleMode: 'clear',
+      starField,
+      orbitTrack,
       shadowTex,
       groundHeightAt,
     };
@@ -653,24 +718,42 @@ export const Scene3DView: React.FC<{
     };
   }, []);
 
-  // Sync theme sky & horizon fog without rebuilding scene
+  // Sync theme sky, starfield & horizon fog without rebuilding scene
   useEffect(() => {
     const h = sceneHandlesRef.current;
     if (!h) return;
-    const bgHex = theme === 'dark' ? 0x091324 : 0xcfe0f5;
+    const isDark = theme === 'dark';
+    const bgHex = isDark ? 0x0b0d12 : 0xd6e6f8;
     h.scene.background = new THREE.Color(bgHex);
-    h.scene.fog = new THREE.FogExp2(bgHex, 0.0145);
-    h.hemiLight.intensity = theme === 'dark' ? 0.72 : 0.92;
-    h.keyLight.intensity = theme === 'dark' ? 2.0 : 2.15;
+    h.scene.fog = new THREE.FogExp2(bgHex, isDark ? 0.0105 : 0.014);
+    h.hemiLight.intensity = isDark ? 0.78 : 0.96;
+    h.keyLight.intensity = isDark ? 2.05 : 2.15;
+    h.starField.visible = isDark;
   }, [theme]);
 
-  // Rebuild terrain heights, vertex colors, instanced trees, station elevation, and radius ring on location/moisture/radius change
+  // Fetch real Copernicus DEM 90m elevation grid for the active coordinates & radius
+  useEffect(() => {
+    let cancelled = false;
+    setDemGrid(null);
+    fetchDemElevationGrid(location.lat, location.lon, radiusKm).then((grid) => {
+      if (!cancelled && grid) {
+        setDemGrid(grid);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [location.lat, location.lon, radiusKm]);
+
+  // Rebuild terrain heights, vertex colors, instanced trees, station elevation, and radius ring on location/DEM/moisture/radius change
   const gwetRoot = telemetry.power.data?.latestGwetRoot ?? null;
   useEffect(() => {
     const h = sceneHandlesRef.current;
     if (!h) return;
 
-    const sampler = makeHeightSampler(location.lat, location.lon);
+    const sampler = demGrid
+      ? makeDemHeightSampler(demGrid)
+      : makeHeightSampler(location.lat, location.lon);
     h.groundHeightAt = sampler;
 
     const pos = h.terrainGeo.attributes.position as THREE.BufferAttribute;
@@ -711,7 +794,9 @@ export const Scene3DView: React.FC<{
     const wPos = h.waterGeo.attributes.position as THREE.BufferAttribute;
     for (let i = 0; i < wPos.count; i++) {
       const z = wPos.getZ(i);
-      const centerX = Math.sin(z * 0.12 + seedA * 0.5) * 4.5 + 5.2;
+      const centerX = demGrid
+        ? Math.sin(z * 0.12) * 4.5 + 5.2
+        : Math.sin(z * 0.12 + seedA * 0.5) * 4.5 + 5.2;
       const x = centerX + h.waterBaseX[i];
       const bedY = sampler(centerX, z);
       wPos.setX(i, x);
@@ -721,6 +806,7 @@ export const Scene3DView: React.FC<{
     h.waterGeo.computeVertexNormals();
 
     h.stationGroup.position.set(0, sampler(0, 0), 0);
+    h.updateHeights(sampler);
     h.updateMoistureTint(gwetRoot);
 
     // Update radius ring on terrain
@@ -731,7 +817,7 @@ export const Scene3DView: React.FC<{
     }
     const visualRingRadius = radiusKm === 25 ? 13 : radiusKm === 50 ? 20 : 26;
     h.ringHolder.add(buildRadiusRing(visualRingRadius, sampler));
-  }, [location.lat, location.lon, gwetRoot, radiusKm]);
+  }, [location.lat, location.lon, gwetRoot, radiusKm, demGrid]);
 
   // Rebuild hazard beacons from real FIRMS + EONET events
   const firmsDetections = telemetry.firms.data?.detections || [];
@@ -774,7 +860,7 @@ export const Scene3DView: React.FC<{
           : 0xf59e0b;
       h.hazardGroup.add(buildHazardBeacon(x, y, z, colorHex, h.shadowTex));
     }
-  }, [firmsDetections, eonetEvents, radiusKm, location.lat, location.lon]);
+  }, [firmsDetections, eonetEvents, radiusKm, location.lat, location.lon, demGrid]);
 
   const hazardCount = useMemo(
     () => Math.min(14, firmsDetections.length) + Math.min(8, eonetEvents.length),
@@ -787,7 +873,7 @@ export const Scene3DView: React.FC<{
       className={
         expanded
           ? 'fixed inset-0 z-[1200] h-screen w-screen overflow-hidden bg-[var(--bg)]'
-          : 'relative h-full w-full overflow-hidden rounded-[6px] border border-[var(--line)] bg-[var(--bg)]'
+          : 'relative h-full w-full overflow-hidden rounded-[14px] bg-[var(--bg)]'
       }
     >
       {/* Dedicated WebGL Mount (strictly isolated from React HUD siblings) */}
@@ -810,13 +896,33 @@ export const Scene3DView: React.FC<{
         </div>
       )}
 
-      {/* Top-Right Compact Action Cluster (HUD toggle + Expand + 2D Switch) — zero backdrop-filter */}
+      {/* Top-Left Google Earth Orbital Readout — solid surface, zero backdrop-filter */}
+      {hudVisible && !webglError && (
+        <div className="pointer-events-none absolute start-3 top-3 z-20 hidden items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3.5 py-1.5 font-mono-tabular text-[11px] shadow-lg sm:flex">
+          <Radio className="h-3.5 w-3.5 shrink-0 text-[var(--interactive)]" aria-hidden="true" />
+          <span className="font-sans font-semibold text-[var(--text)]">VIIRS Earth Orbit</span>
+          <span className="text-[var(--muted)]" aria-hidden="true">·</span>
+          <span className="text-[var(--muted)]">{formatCoordinates(location.lat, location.lon)}</span>
+          <span className="text-[var(--muted)]" aria-hidden="true">·</span>
+          <span className="text-[var(--muted)]">{radiusKm} km</span>
+          {demGrid && (
+            <>
+              <span className="text-[var(--muted)]" aria-hidden="true">·</span>
+              <span className="text-[var(--interactive)]">
+                DEM {demGrid.minElevM}–{demGrid.maxElevM}m ASL
+              </span>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Top-Right Google Earth Action Capsules — zero backdrop-filter */}
       <div className="absolute end-3 top-3 z-20 flex items-center gap-1.5">
         {onSwitchTo2D && !expanded && (
           <button
             type="button"
             onClick={onSwitchTo2D}
-            className="inline-flex h-8 items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 text-[12px] font-medium text-[var(--text)] shadow-sm hover:border-[var(--interactive)]"
+            className="inline-flex h-8 items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3.5 text-[12px] font-medium text-[var(--text)] shadow-lg hover:border-[var(--interactive)]"
           >
             <span>{t.mapLayers.mapToggle}</span>
           </button>
@@ -827,7 +933,7 @@ export const Scene3DView: React.FC<{
           onClick={() => setHudVisible((v) => !v)}
           title="Toggle 3D Controls (H)"
           aria-label="Toggle 3D Controls"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--text)] shadow-sm hover:border-[var(--interactive)]"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--text)] shadow-lg hover:border-[var(--interactive)]"
         >
           {hudVisible ? (
             <EyeOff className="h-3.5 w-3.5 text-[var(--interactive)]" aria-hidden="true" />
@@ -841,7 +947,7 @@ export const Scene3DView: React.FC<{
           onClick={() => setExpanded((e) => !e)}
           title={expanded ? t.mapLayers.exitExpand3D : t.mapLayers.expand3D}
           aria-label={expanded ? t.mapLayers.exitExpand3D : t.mapLayers.expand3D}
-          className="inline-flex h-8 items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--surface)] px-2.5 text-[12px] font-medium text-[var(--text)] shadow-sm hover:border-[var(--interactive)]"
+          className="inline-flex h-8 items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 text-[12px] font-medium text-[var(--text)] shadow-lg hover:border-[var(--interactive)]"
         >
           {expanded ? (
             <>
@@ -857,10 +963,10 @@ export const Scene3DView: React.FC<{
         </button>
       </div>
 
-      {/* Collapsible Floating Bottom Dock (<= 15% viewport height, solid surface, zero backdrop-filter) */}
+      {/* Collapsible Google Earth Floating Bottom Capsule Dock (zero backdrop-filter) */}
       {hudVisible && !webglError && (
         <div className="pointer-events-none absolute bottom-3 end-3 start-3 z-20 flex justify-center">
-          <div className="pointer-events-auto flex max-w-full flex-wrap items-center justify-center gap-1.5 rounded-[8px] border border-[var(--line)] bg-[var(--surface)] px-2.5 py-1.5 shadow-md">
+          <div className="pointer-events-auto flex max-w-full flex-wrap items-center justify-center gap-1.5 rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-3 py-1.5 shadow-2xl sm:rounded-full">
             {/* Camera Presets */}
             {(
               [
@@ -906,7 +1012,7 @@ export const Scene3DView: React.FC<{
             <button
               type="button"
               onClick={() => setShowSatellite((s) => !s)}
-              className={`inline-flex h-7 items-center gap-1 rounded-full border px-2 text-[11px] font-medium ${
+              className={`inline-flex h-7 items-center gap-1 rounded-full border px-2.5 text-[11px] font-medium ${
                 showSatellite
                   ? 'border-[var(--interactive)] bg-[var(--primary)] text-white'
                   : 'border-[var(--line)] bg-[var(--bg)] text-[var(--muted)]'
@@ -919,7 +1025,7 @@ export const Scene3DView: React.FC<{
             <button
               type="button"
               onClick={() => setShowParticles((s) => !s)}
-              className={`inline-flex h-7 items-center gap-1 rounded-full border px-2 text-[11px] font-medium ${
+              className={`inline-flex h-7 items-center gap-1 rounded-full border px-2.5 text-[11px] font-medium ${
                 showParticles
                   ? 'border-[var(--interactive)] bg-[var(--primary)] text-white'
                   : 'border-[var(--line)] bg-[var(--bg)] text-[var(--muted)]'
@@ -932,7 +1038,7 @@ export const Scene3DView: React.FC<{
             <button
               type="button"
               onClick={() => setShowHazards((s) => !s)}
-              className={`inline-flex h-7 items-center gap-1 rounded-full border px-2 text-[11px] font-medium ${
+              className={`inline-flex h-7 items-center gap-1 rounded-full border px-2.5 text-[11px] font-medium ${
                 showHazards
                   ? 'border-[var(--interactive)] bg-[var(--primary)] text-white'
                   : 'border-[var(--line)] bg-[var(--bg)] text-[var(--muted)]'

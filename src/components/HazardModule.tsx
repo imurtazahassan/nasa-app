@@ -21,9 +21,11 @@ export const HazardModule: React.FC<HazardModuleProps> = ({ evaluation, loading 
   // Sequential Telemetry Lock / Systems Check skeleton
   if (loading) {
     return (
-      <article className="rounded-[6px] border border-[var(--line)] border-s-4 border-s-[var(--interactive)] bg-[var(--surface)] p-3.5">
+      <article className="relative overflow-hidden rounded-[14px] border border-[var(--line)] bg-[var(--surface)]/95 p-4">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-[15px] font-semibold text-[var(--text)]">{hazardTitle}</span>
+          <span className="font-display text-[15px] font-semibold text-[var(--text)]">
+            {hazardTitle}
+          </span>
           <span className="font-mono-tabular text-[11px] text-[var(--interactive)]">
             {t.acquiringStream}
           </span>
@@ -32,21 +34,24 @@ export const HazardModule: React.FC<HazardModuleProps> = ({ evaluation, loading 
           <div className="animate-telemetry-sweep h-full w-2/5 bg-[var(--interactive)]" />
         </div>
         <div className="mt-3 flex items-baseline justify-between">
-          <div className="h-7 w-24 rounded-[4px] bg-[var(--raised)]" />
-          <div className="h-8 w-28 rounded-[4px] bg-[var(--raised)]" />
+          <div className="h-7 w-24 rounded-[8px] bg-[var(--raised)]" />
+          <div className="h-8 w-28 rounded-[8px] bg-[var(--raised)]" />
         </div>
       </article>
     );
   }
 
   return (
-    <article
-      className="rounded-[6px] border border-[var(--line)] border-s-4 bg-[var(--surface)] p-3.5 transition-colors duration-150"
-      style={{ borderInlineStartColor: statusColor }}
-    >
+    <article className="relative overflow-hidden rounded-[14px] border border-[var(--line)] bg-[var(--surface)]/95 p-4 pt-4 transition-colors duration-150">
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 h-[2px]"
+        style={{ backgroundColor: statusColor }}
+      />
+
       {/* Header row */}
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-[16px] font-semibold text-[var(--text)]">{hazardTitle}</h2>
+        <h2 className="font-display text-[16px] font-semibold text-[var(--text)]">{hazardTitle}</h2>
         <StatusGlyph status={evaluation.status} />
       </div>
 
@@ -179,7 +184,7 @@ export const HazardModule: React.FC<HazardModuleProps> = ({ evaluation, loading 
         </button>
 
         {expanded && (
-          <div className="mt-2 space-y-2.5 rounded-[4px] border border-[var(--line)] bg-[var(--bg)] p-2.5 text-[12px]">
+          <div className="mt-2 space-y-2.5 rounded-[10px] border border-[var(--line)] bg-[var(--bg)] p-3 text-[12px]">
             {evaluation.rawInputs.length > 0 && (
               <div>
                 <div className="mb-1 text-[11px] font-semibold text-[var(--muted)]">
