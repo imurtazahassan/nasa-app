@@ -1,0 +1,162 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --bg: #F3F6FA;
+  --surface: #FFFFFF;
+  --raised: #E9EEF5;
+  --hud: rgba(255, 255, 255, 0.90);
+  --line: #D4DCE8;
+  --text: #0B192C;
+  --muted: #4E617D;
+  --primary: #0B3D91;
+  --interactive: #0B3D91;
+  --accent-red: #FC3D21;
+  --status-nominal: #10B981;
+  --status-watch: #F59E0B;
+  --status-warning: #F97316;
+  --status-critical: #FC3D21;
+  --status-nodata: #4E617D;
+}
+
+.dark {
+  --bg: #070D19;
+  --surface: #0E1729;
+  --raised: #15223B;
+  --hud: rgba(14, 23, 41, 0.88);
+  --line: #1E2F4D;
+  --text: #F3F6FC;
+  --muted: #94A6C4;
+  --primary: #0B3D91;
+  --interactive: #5B9BFF;
+  --accent-red: #FC3D21;
+  --status-nominal: #10B981;
+  --status-watch: #F59E0B;
+  --status-warning: #F97316;
+  --status-critical: #FC3D21;
+  --status-nodata: #94A6C4;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html[lang="ur"],
+  html[lang="ur"] body {
+    font-family: 'Noto Naskh Arabic', 'IBM Plex Sans', sans-serif;
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--interactive);
+    outline-offset: 2px;
+  }
+}
+
+.font-mono-tabular {
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Sequential Telemetry Lock / Systems Check progress bar */
+@keyframes telemetry-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+.animate-telemetry-sweep {
+  animation: telemetry-sweep 1.35s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-telemetry-sweep {
+    animation: none;
+    transform: translateX(0);
+    width: 100%;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* Custom thin aerospace scrollbars */
+.telemetry-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+.telemetry-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.telemetry-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.telemetry-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--line);
+  border-radius: 3px;
+}
+
+/* Leaflet telemetry map styling */
+.leaflet-container {
+  background-color: var(--bg) !important;
+  font-family: 'IBM Plex Sans', sans-serif !important;
+}
+
+.earthpulse-popup .leaflet-popup-content-wrapper,
+.earthpulse-popup .leaflet-popup-tip {
+  background-color: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--line);
+  border-radius: 6px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.35) !important;
+}
+
+.earthpulse-popup .leaflet-popup-close-button {
+  color: var(--muted) !important;
+}
+
+.earthpulse-div-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Print Field Brief stylesheet */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+
+  html,
+  body,
+  #root {
+    height: auto !important;
+    overflow: visible !important;
+    background: #FFFFFF !important;
+    color: #0B192C !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+}
